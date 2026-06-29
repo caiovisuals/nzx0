@@ -8,6 +8,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { createBlocks, type Block } from "./Blocks"
 import { ChromaticAberrationShader } from "./shaders/ChromaticAberrationShader"
 
+const FLOOR_Y = -9.5
 const BLOCK_COUNT = 6
 const SPACING = 9
 const PERIOD = BLOCK_COUNT * SPACING
@@ -28,6 +29,7 @@ export class Experience {
     private aberration: ShaderPass
     private bloom: UnrealBloomPass
     private blocks: Block[] = []
+    private floor!: THREE.Mesh
     private clock = new THREE.Clock()
     private reducedMotion: boolean
     private onActiveBlock?: (index: number) => void
@@ -81,6 +83,19 @@ export class Experience {
         const rim = new THREE.DirectionalLight(0x4466ff, 1.2)
         rim.position.set(-4, -2, -6)
         this.scene.add(key, rim, new THREE.AmbientLight(0x223044, 0.6))
+
+        // chão amplo do estúdio (reflexo sutil do environment)
+        const floorGeo = new THREE.PlaneGeometry(220, 420)
+        const floorMat = new THREE.MeshStandardMaterial({
+            color: 0xC2C7D1,
+            roughness: 0.55,
+            metalness: 0.1,
+            envMapIntensity: 0.5,
+        })
+        this.floor = new THREE.Mesh(floorGeo, floorMat)
+        this.floor.rotation.x = -Math.PI / 2
+        this.floor.position.set(0, FLOOR_Y, -60)
+        this.scene.add(this.floor)
 
         // blocos
         for (let i = 0; i < BLOCK_COUNT; i++) {
@@ -162,9 +177,9 @@ export class Experience {
         this.pointer.lerp(this.pointerTarget, Math.min(1, dt * 4))
         const sway = this.reducedMotion ? 0 : 1
         this.camera.position.x = this.pointer.x * 0.6 * sway
-        this.camera.position.y = -this.pointer.y * 0.4 * sway
+        this.camera.position.y = -this.pointer.y * 0.4 * sway + 2
         this.camera.position.z = CAM_Z + (1 - this.intro) * 14
-        this.camera.lookAt(0, 0, CAM_Z - SPACING)
+        this.camera.lookAt(0, 0.5, CAM_Z - SPACING)
 
         // aberração cromática: base + reação à velocidade do scroll + intro
         const speed = Math.min(Math.abs(this.velocity) * 0.0015, 1)
