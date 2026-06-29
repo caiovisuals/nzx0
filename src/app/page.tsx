@@ -1,10 +1,9 @@
-import Logo from "@/_components/ui/Logo"
+import Scene from "@/_components/Scene"
 
 export default function Home() {
     return (
-        <div className="relative">
-            <Logo />
-            <div></div>
-        </div>
+        <main className="relative">
+            <Scene />
+        </main>
     )
 }
