@@ -1,6 +1,6 @@
 import Logo from "@/_components/ui/Logo"
 
-export default function Home() {
+export default function NotFound() {
     return (
         <div className="relative">
             <Logo />
