@@ -5,9 +5,9 @@ import { gsap } from "gsap"
 import { Experience, BLOCK_COUNT } from "@/_lib/three/Experience"
 import { SmoothScroll } from "@/_lib/scroll/SmoothScroll"
 import Loader from "@/_components/ui/Loader"
-import Overlay from "@/_components/Overlay"
+import NotFoundOverlay from "@/_components/NotFoundOverlay"
 
-export default function Scene() {
+export default function NotFoundScene() {
     const containerRef = useRef<HTMLDivElement>(null)
     const [progress, setProgress] = useState(0)
     const [done, setDone] = useState(false)
@@ -58,13 +58,9 @@ export default function Scene() {
 
     return (
         <>
-            {/* canvas WebGL fixo cobrindo a viewport */}
             <div ref={containerRef} className="pointer-events-none fixed inset-0 z-10" />
-
-            <Overlay activeBlock={activeBlock} visible={done} />
+            <NotFoundOverlay />
             <Loader progress={progress} done={done} />
-
-            {/* spacer que dá altura ao documento para o scroll infinito do Lenis */}
             <div aria-hidden style={{ height: `${(BLOCK_COUNT + 1) * 100}vh` }} />
         </>
     )

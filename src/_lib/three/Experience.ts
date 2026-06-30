@@ -15,6 +15,19 @@ const PERIOD = BLOCK_COUNT * SPACING
 const CAM_Z = 8
 const BEHIND = 2.5 // ponto de reciclagem, logo atrás da câmera (invisível)
 
+const PARALLAX_X = 0.6 // amplitude horizontal (unidades de mundo)
+const PARALLAX_Y = 0.4 // amplitude vertical
+const PARALLAX_EASE = 4 // suavização do alvo do ponteiro (maior = mais responsivo)
+
+// Idle Camera Motion — respiração lenta e contínua da câmera
+const BREATH_X_AMP = 0.07 // balanço horizontal
+const BREATH_X_SPEED = 0.45
+const BREATH_Y_AMP = 0.05 // sobe/desce
+const BREATH_Y_SPEED = 0.31
+const BREATH_Z_AMP = 0.04 // aproxima/afasta levemente
+const BREATH_Z_SPEED = 0.23
+const BREATH_ROLL_AMP = 0.006 // rotação (roll) quase imperceptível
+
 export interface ExperienceOptions {
     reducedMotion?: boolean
     onActiveBlock?: (index: number) => void
@@ -173,13 +186,23 @@ export class Experience {
 
         this.positionBlocks(travel, time)
 
-        // parallax de mouse + leve respiração da câmera
-        this.pointer.lerp(this.pointerTarget, Math.min(1, dt * 4))
+        // Pointer Parallax — câmera segue suavemente o mouse
+        this.pointer.lerp(this.pointerTarget, Math.min(1, dt * PARALLAX_EASE))
         const sway = this.reducedMotion ? 0 : 1
-        this.camera.position.x = this.pointer.x * 0.6 * sway
-        this.camera.position.y = -this.pointer.y * 0.4 * sway + 2
-        this.camera.position.z = CAM_Z + (1 - this.intro) * 14
+        const parallaxX = this.pointer.x * PARALLAX_X * sway
+        const parallaxY = -this.pointer.y * PARALLAX_Y * sway
+
+        // Idle Camera Motion — respiração lenta sobreposta ao parallax
+        const breathX = Math.sin(time * BREATH_X_SPEED) * BREATH_X_AMP * sway
+        const breathY = Math.cos(time * BREATH_Y_SPEED) * BREATH_Y_AMP * sway
+        const breathZ = Math.sin(time * BREATH_Z_SPEED) * BREATH_Z_AMP * sway
+        const roll = Math.sin(time * BREATH_X_SPEED * 0.7) * BREATH_ROLL_AMP * sway
+
+        this.camera.position.x = parallaxX + breathX
+        this.camera.position.y = parallaxY + breathY + 2
+        this.camera.position.z = CAM_Z + breathZ + (1 - this.intro) * 14
         this.camera.lookAt(0, 0.5, CAM_Z - SPACING)
+        this.camera.rotation.z += roll
 
         // aberração cromática: base + reação à velocidade do scroll + intro
         const speed = Math.min(Math.abs(this.velocity) * 0.0015, 1)

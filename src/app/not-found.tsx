@@ -1,10 +1,9 @@
-import Logo from "@/_components/ui/Logo"
+import NotFoundScene from "@/_components/NotFoundScene"
 
 export default function NotFound() {
     return (
-        <div className="relative">
-            <Logo />
-            <div></div>
-        </div>
+        <main className="relative">
+            <NotFoundScene />
+        </main>
     )
 }
